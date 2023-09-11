@@ -4,5 +4,4 @@ return{
   "NinjahExpert",
   "Marshmellogamingz149",
   "Op_Destroyer14",
-  "LOLEZSA"
 }
