@@ -12,4 +12,5 @@ return{
   "Duezos", 
   "susl11kk", 
   "JSJSJAJAJAJ"
+  "Suslirito"
 }
