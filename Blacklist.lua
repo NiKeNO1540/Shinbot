@@ -11,7 +11,11 @@ return{
   "boikatop008", 
   "Duezos", 
   "susl11kk", 
-  "JSJSJAJAJAJ"
-  "Suslirito"
-  "shinobi_apol"
+  "JSJSJAJAJAJ",
+  "Suslirito",
+  "shinobi_apol",
+  "GGoodGame"
+  "GLPSQUIDY2"
+  "MansukhSandhu"
+  "Nanni_THEcow"
 }
