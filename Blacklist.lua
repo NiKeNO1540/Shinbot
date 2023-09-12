@@ -14,8 +14,8 @@ return{
   "JSJSJAJAJAJ",
   "Suslirito",
   "shinobi_apol",
-  "GGoodGame"
-  "GLPSQUIDY2"
-  "MansukhSandhu"
-  "Nanni_THEcow"
+  "GGoodGame",
+  "GLPSQUIDY2",
+  "MansukhSandhu",
+  "Nanni_THEcow",
 }
