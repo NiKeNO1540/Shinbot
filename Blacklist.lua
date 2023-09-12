@@ -13,4 +13,5 @@ return{
   "susl11kk", 
   "JSJSJAJAJAJ"
   "Suslirito"
+  "shinobi_apol"
 }
