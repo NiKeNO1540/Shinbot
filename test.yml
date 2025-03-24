@@ -1,0 +1,142 @@
+- name: Configure EcoRouter Device
+  hosts: BR-RTR
+  gather_facts: false
+  become: true
+  become_method: enable #  Указываем метод повышения привилегий
+
+  tasks:
+    - name: Basic Configuration
+      ansible.builtin.cli_config:
+        config: |
+          hostname br-rtr
+          ip domain-name au-team.irpo
+      register: basic_config_result
+
+    - name: Save basic config
+      ansible.builtin.command:
+        cmd: "write memory"
+      when: basic_config_result.changed
+
+
+
+    - name: Configure Interfaces
+      ansible.builtin.cli_config:
+        config: |
+          interface int1
+          description "to br-srv"
+          ip address 192.168.3.1/27
+          exit
+          port te1
+          service-instance te1/int1
+          encapsulation untagged
+          exit
+          exit
+          interface int1
+          connect port te1 service-instance te1/int1
+          exit
+          ip route 0.0.0.0 0.0.0.0 172.16.5.1
+      register: interface_config_result
+
+    - name: Save interface config
+      ansible.builtin.command:
+        cmd: "write memory"
+      when: interface_config_result.changed
+
+
+    - name: Create User
+      ansible.builtin.cli_config:
+        config: |
+          username net_admin
+          password P@ssw0rd
+          role admin
+          exit
+      register: user_config_result
+
+    - name: Save user config
+      ansible.builtin.command:
+        cmd: "write memory"
+      when: user_config_result.changed
+
+
+    - name: Configure IP Tunnel
+      ansible.builtin.cli_config:
+        config: |
+          int tunnel.0
+          ip add 172.16.0.2/30
+          ip mtu 1400
+          ip tunnel 172.16.5.5 172.16.4.4 mode gre
+          ip ospf authentication-key ecorouter
+          exit
+      register: tunnel_config_result
+
+    - name: Save tunnel config
+      ansible.builtin.command:
+        cmd: "write memory"
+      when: tunnel_config_result.changed
+
+
+
+    - name: Configure OSPF
+      ansible.builtin.cli_config:
+        config: |
+          router ospf 1
+          network 172.16.0.0/30 area 0
+          network 192.168.3.0/27 area 0
+          passive-interface default
+          no passive-interface tunnel.0
+          area 0 authentication
+          exit
+      register: ospf_config_result
+
+    - name: Save OSPF config
+      ansible.builtin.command:
+        cmd: "write memory"
+      when: ospf_config_result.changed
+
+
+    - name: Configure NAT
+      ansible.builtin.cli_config:
+        config: |
+          int int1
+          ip nat inside
+          exit
+          int int0
+          ip nat outside
+          exit
+          ip nat pool NAT_POOL 192.168.3.1-192.168.3.254
+          ip nat source dynamic inside-to-outside pool NAT_POOL overload interface int0
+          exit
+      register: nat_config_result
+
+    - name: Save NAT config
+      ansible.builtin.command:
+        cmd: "write memory"
+      when: nat_config_result.changed
+
+    - name: Ping Test (Optional - Requires Connectivity)
+      ansible.builtin.command:
+        cmd: ping 8.8.8.8
+      ignore_errors: true # Игнорируем ошибки, если пинг не пройдет (например, нет доступа к интернету)
+
+
+    - name: Configure Timezone
+      ansible.builtin.cli_config:
+          config: |
+            ntp timezone utc+5
+            exit
+      register: timezone_config
+
+    - name: Show NTP Timezone
+      ansible.builtin.command:
+        cmd: show ntp timezone
+      register: show_ntp
+      changed_when: false # Команда 'show' не изменяет конфигурацию
+
+    - name: Debug - Show NTP output
+      ansible.builtin.debug:
+        var: show_ntp.stdout_lines
+
+    - name: Save timezone config
+      ansible.builtin.command:
+        cmd: "write memory"
+      when: timezone_config.changed
